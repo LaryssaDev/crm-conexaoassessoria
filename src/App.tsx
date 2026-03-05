@@ -16,6 +16,7 @@ import Contract from './pages/Contract';
 import Costs from './pages/Costs';
 import Financial from './pages/Financial';
 import History from './pages/History';
+import Goals from './pages/Goals';
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
                 <Route path="/ranking" element={<Ranking />} />
                 <Route path="/agenda" element={<Agenda />} />
                 <Route path="/team" element={<Team />} />
+                <Route path="/goals" element={<Goals />} />
                 <Route path="/contract" element={<Contract />} />
                 <Route path="/costs" element={<Costs />} />
                 <Route path="/financial" element={<Financial />} />

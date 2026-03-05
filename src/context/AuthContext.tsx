@@ -22,7 +22,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = (username: string, password: string) => {
-    const foundUser = USERS.find(u => u.username === username && u.password === password);
+    // Try to get users from localStorage first to ensure we have the latest data
+    const storedUsers = localStorage.getItem('conexao_users_v2');
+    const currentUsers: User[] = storedUsers ? JSON.parse(storedUsers) : USERS;
+
+    const foundUser = currentUsers.find(u => u.username === username && u.password === password);
+    
     if (foundUser) {
       // Don't store password in state/localstorage
       const { password, ...userWithoutPassword } = foundUser;

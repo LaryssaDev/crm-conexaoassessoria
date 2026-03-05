@@ -1,7 +1,7 @@
-import { User, Lead, Team, Cost, FinancialRecord } from '../types';
+import { User, Lead, Team, Cost, FinancialRecord, Event } from '../types';
 
 export const USERS: User[] = [
-  { id: '1', name: 'Administrador', username: 'adm100', password: '100adm', role: 'ADM' },
+  { id: '1', name: 'Administrador', username: 'aline.ferreira', password: 'aline3005', role: 'ADM' },
   { id: '2', name: 'Supervisor Comercial', username: 'comercialsuper', password: 'comercial01', role: 'SUPERVISOR_COMERCIAL', teamId: 'team1' },
   { id: '3', name: 'Consultor Comercial 1', username: 'consultorcomercial1', password: 'comercialvendas', role: 'CONSULTOR_COMERCIAL', teamId: 'team1' },
   { id: '4', name: 'Supervisor Jurídico', username: 'juridicosuper', password: 'juridico01', role: 'SUPERVISOR_JURIDICO', teamId: 'team2' },
@@ -13,6 +13,11 @@ export const USERS: User[] = [
 export const TEAMS: Team[] = [
   { id: 'team1', name: 'Equipe Comercial Alpha', supervisorId: '2' },
   { id: 'team2', name: 'Equipe Jurídica Beta', supervisorId: '4' },
+];
+
+export const EVENTS: Event[] = [
+  { id: '1', title: 'Reunião com Cliente João', date: '2023-10-27', time: '10:00', type: 'Reunião', userId: '3' },
+  { id: '2', title: 'Pagamento Aluguel', date: '2023-11-05', time: '09:00', type: 'Pagamento', userId: '3' },
 ];
 
 export const LEADS: Lead[] = [
@@ -77,12 +82,6 @@ export const LEADS: Lead[] = [
   }
 ];
 
-export const COSTS: Cost[] = [
-  { id: 'c1', description: 'Aluguel Escritório', category: 'Infraestrutura', dueDate: 5, value: 2500, status: 'Pendente' },
-  { id: 'c2', description: 'Internet', category: 'Infraestrutura', dueDate: 10, value: 150, status: 'Pago' },
-];
+export const COSTS: Cost[] = [];
 
-export const FINANCIAL_RECORDS: FinancialRecord[] = [
-  { id: 'f1', type: 'RECEITA', description: 'Contrato Carlos Pereira', value: 5000, date: new Date(Date.now() - 172800000).toISOString(), leadId: 'l3' },
-  { id: 'f2', type: 'DESPESA', description: 'Internet', value: 150, date: new Date().toISOString(), category: 'Infraestrutura' },
-];
+export const FINANCIAL_RECORDS: FinancialRecord[] = [];

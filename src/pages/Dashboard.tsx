@@ -7,24 +7,32 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { leads, financialRecords, teams } = useData();
+  const { leads, financialRecords, teams, users } = useData();
 
-  const stats = useMemo(() => {
-    if (!user) return null;
+  const { stats, chartData } = useMemo(() => {
+    if (!user) return { stats: null, chartData: [] };
 
     let filteredLeads = leads;
     let filteredFinancials = financialRecords;
 
     if (user.role === 'SUPERVISOR_COMERCIAL') {
       filteredLeads = leads.filter(l => l.commercialSupervisorId === user.id);
-      // Financials: records where responsible is in my team OR department is COMMERCIAL (if I want to see all dept revenue? No, usually my team)
-      // For simplicity, let's filter by department 'COMERCIAL' for now as we don't have full team hierarchy implemented in mock data perfectly.
-      // Or better: filter by records where responsibleId is a consultant under this supervisor.
-      // Given mock data limitations, let's assume Supervisor sees all COMMERCIAL revenue for now, or we can try to match responsibleId.
-      filteredFinancials = financialRecords.filter(f => f.department === 'COMERCIAL');
+      
+      // Filter financials by team members
+      const teamMemberIds = users.filter(u => u.teamId === user.teamId).map(u => u.id);
+      filteredFinancials = financialRecords.filter(f => 
+        f.responsibleId && teamMemberIds.includes(f.responsibleId)
+      );
+
     } else if (user.role === 'SUPERVISOR_JURIDICO') {
       filteredLeads = leads.filter(l => l.legalSupervisorId === user.id);
-      filteredFinancials = financialRecords.filter(f => f.department === 'JURIDICO');
+      
+      // Filter financials by team members
+      const teamMemberIds = users.filter(u => u.teamId === user.teamId).map(u => u.id);
+      filteredFinancials = financialRecords.filter(f => 
+        f.responsibleId && teamMemberIds.includes(f.responsibleId)
+      );
+
     } else if (user.role === 'CONSULTOR_COMERCIAL') {
       filteredLeads = leads.filter(l => l.commercialConsultantId === user.id);
       filteredFinancials = financialRecords.filter(f => f.responsibleId === user.id);
@@ -33,6 +41,7 @@ const Dashboard = () => {
       filteredFinancials = financialRecords.filter(f => f.responsibleId === user.id);
     }
 
+    // Stats Calculation
     const totalRevenue = filteredFinancials
       .filter(f => f.type === 'RECEITA')
       .reduce((acc, curr) => acc + curr.value, 0);
@@ -47,7 +56,7 @@ const Dashboard = () => {
     const goal = 100000;
     const goalPercentage = ((totalRevenue / goal) * 100).toFixed(1);
 
-    return {
+    const statsData = {
       totalRevenue,
       negotiation,
       closed,
@@ -55,16 +64,41 @@ const Dashboard = () => {
       conversionRate,
       goalPercentage
     };
-  }, [user, leads, financialRecords, teams]);
 
-  const chartData = [
-    { name: 'Jan', receita: 4000 },
-    { name: 'Fev', receita: 3000 },
-    { name: 'Mar', receita: 2000 },
-    { name: 'Abr', receita: 2780 },
-    { name: 'Mai', receita: 1890 },
-    { name: 'Jun', receita: 2390 },
-  ];
+    // Chart Data Calculation
+    const monthlyData: { [key: string]: number } = {};
+
+    filteredFinancials.forEach(record => {
+      if (record.type === 'RECEITA') {
+        const date = new Date(record.date);
+        // Use YYYY-MM as key for sorting
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        monthlyData[key] = (monthlyData[key] || 0) + record.value;
+      }
+    });
+
+    // If no data, provide at least current month with 0
+    if (Object.keys(monthlyData).length === 0) {
+      const now = new Date();
+      const key = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      monthlyData[key] = 0;
+    }
+
+    const chartData = Object.entries(monthlyData)
+      .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+      .map(([key, value]) => {
+        const [year, month] = key.split('-');
+        // Create date object correctly (month is 0-indexed in Date constructor)
+        const dateObj = new Date(parseInt(year), parseInt(month) - 1, 1);
+        const monthName = dateObj.toLocaleString('pt-BR', { month: 'short' });
+        return {
+          name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+          receita: value,
+        };
+      });
+
+    return { stats: statsData, chartData };
+  }, [user, leads, financialRecords, teams]);
 
   if (!stats) return <div>Carregando...</div>;
 
@@ -127,7 +161,7 @@ const Dashboard = () => {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
-              <Tooltip />
+              <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
               <Legend />
               <Bar dataKey="receita" fill="#8a2695" name="Receita" />
             </BarChart>

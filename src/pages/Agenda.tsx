@@ -1,23 +1,13 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useData } from '../context/DataContext';
 import Modal from '../components/Modal';
 import { Calendar as CalendarIcon, Clock, Plus, Trash, Users, DollarSign } from 'lucide-react';
-
-interface Event {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  type: 'Reunião' | 'Pagamento' | 'Compromisso';
-  userId: string;
-}
+import { Event } from '../types';
 
 const Agenda = () => {
   const { user } = useAuth();
-  const [events, setEvents] = useState<Event[]>([
-    { id: '1', title: 'Reunião com Cliente João', date: '2023-10-27', time: '10:00', type: 'Reunião', userId: user?.id || '' },
-    { id: '2', title: 'Pagamento Aluguel', date: '2023-11-05', time: '09:00', type: 'Pagamento', userId: user?.id || '' },
-  ]);
+  const { events, addEvent, deleteEvent } = useData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newEvent, setNewEvent] = useState<Partial<Event>>({
     title: '',
@@ -41,13 +31,9 @@ const Agenda = () => {
       time: newEvent.time || '',
       type: (newEvent.type as 'Reunião' | 'Pagamento' | 'Compromisso') || 'Reunião',
     };
-    setEvents([...events, event]);
+    addEvent(event);
     setIsModalOpen(false);
     setNewEvent({ title: '', date: '', time: '', type: 'Reunião' });
-  };
-
-  const deleteEvent = (id: string) => {
-    setEvents(events.filter(e => e.id !== id));
   };
 
   const myEvents = events.filter(e => e.userId === user?.id).sort((a, b) => new Date(a.date + 'T' + a.time).getTime() - new Date(b.date + 'T' + b.time).getTime());

@@ -20,6 +20,7 @@ export interface Team {
   id: string;
   name: string;
   supervisorId: string;
+  goal?: number;
 }
 
 export type LeadStatus = 'NOVO' | 'EM_NEGOCIACAO' | 'FECHADO' | 'PERDIDO';
@@ -87,4 +88,13 @@ export interface FinancialRecord {
   leadId?: string; // If linked to a lead
   department?: 'COMERCIAL' | 'JURIDICO'; // Rule 1 & 2
   responsibleId?: string; // Rule 1 & 2
+}
+
+export interface Event {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  type: 'Reunião' | 'Pagamento' | 'Compromisso';
+  userId: string;
 }

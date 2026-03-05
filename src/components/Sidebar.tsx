@@ -13,7 +13,8 @@ import {
   LogOut,
   Menu,
   X,
-  Activity
+  Activity,
+  Filter
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -34,7 +35,8 @@ const Sidebar = () => {
     { to: '/leads', icon: Users, label: 'Leads', roles: ['ADM', 'SUPERVISOR_COMERCIAL', 'CONSULTOR_COMERCIAL', 'SUPERVISOR_JURIDICO', 'CONSULTOR_JURIDICO'] },
     { to: '/history', icon: Activity, label: 'Andamento', roles: ['ADM', 'SUPERVISOR_COMERCIAL', 'CONSULTOR_COMERCIAL', 'SUPERVISOR_JURIDICO', 'CONSULTOR_JURIDICO'] },
     { to: '/attribution', icon: Briefcase, label: 'Atribuição', roles: ['ADM', 'SUPERVISOR_COMERCIAL', 'SUPERVISOR_JURIDICO'] },
-    { to: '/funnel', icon: Target, label: 'Funil', roles: ['ADM', 'SUPERVISOR_COMERCIAL', 'CONSULTOR_COMERCIAL'] },
+    { to: '/funnel', icon: Filter, label: 'Funil', roles: ['ADM', 'SUPERVISOR_COMERCIAL', 'CONSULTOR_COMERCIAL'] },
+    { to: '/goals', icon: Target, label: 'Meta', roles: ['ADM', 'SUPERVISOR_COMERCIAL', 'CONSULTOR_COMERCIAL', 'SUPERVISOR_JURIDICO', 'CONSULTOR_JURIDICO'] },
     { to: '/ranking', icon: Trophy, label: 'Ranking', roles: ['ADM', 'SUPERVISOR_COMERCIAL'] },
     { to: '/agenda', icon: Calendar, label: 'Agenda', roles: ['ADM', 'SUPERVISOR_COMERCIAL', 'CONSULTOR_COMERCIAL', 'SUPERVISOR_JURIDICO', 'CONSULTOR_JURIDICO'] },
     { to: '/team', icon: Users, label: 'Equipe', roles: ['ADM'] },
