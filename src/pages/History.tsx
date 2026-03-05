@@ -69,6 +69,14 @@ const History = () => {
     updateLead(selectedLead.id, { history: updatedHistory });
 
     if (newRecord.type === 'PAGAMENTO') {
+      // Determine responsible consultant based on department
+      let responsibleId = user?.id;
+      if (newRecord.department === 'COMERCIAL' && selectedLead.commercialConsultantId) {
+        responsibleId = selectedLead.commercialConsultantId;
+      } else if (newRecord.department === 'JURIDICO' && selectedLead.legalConsultantId) {
+        responsibleId = selectedLead.legalConsultantId;
+      }
+
       addFinancialRecord({
         id: Math.random().toString(36).substr(2, 9),
         type: 'RECEITA',
@@ -78,7 +86,7 @@ const History = () => {
         category: newRecord.department === 'COMERCIAL' ? 'Venda Inicial' : 'Complemento Jurídico',
         leadId: selectedLead.id,
         department: newRecord.department as any,
-        responsibleId: user?.id,
+        responsibleId: responsibleId,
       });
     }
 

@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { Cost } from '../types';
 import Modal from '../components/Modal';
-import { Plus, Trash, Check, AlertCircle } from 'lucide-react';
+import { Plus, Trash, Check, AlertCircle, XCircle } from 'lucide-react';
 
 const Costs = () => {
-  const { costs, addCost, updateCost, deleteCost, addFinancialRecord } = useData();
+  const { costs, addCost, updateCost, deleteCost, addFinancialRecord, deleteFinancialRecord } = useData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newCost, setNewCost] = useState<Partial<Cost>>({
     description: '',
@@ -34,13 +34,19 @@ const Costs = () => {
   const handleMarkAsPaid = (cost: Cost) => {
     updateCost(cost.id, { status: 'Pago' });
     addFinancialRecord({
-      id: Math.random().toString(36).substr(2, 9),
+      id: `cost-${cost.id}`, // Use a deterministic ID to easily find and delete it later if needed
       type: 'DESPESA',
       description: cost.description,
       value: Number(cost.value),
       date: new Date().toISOString(),
       category: cost.category
     });
+  };
+
+  const handleMarkAsPending = (cost: Cost) => {
+    updateCost(cost.id, { status: 'Pendente' });
+    // Try to delete the associated financial record
+    deleteFinancialRecord(`cost-${cost.id}`);
   };
 
   const totalPending = costs.filter(c => c.status === 'Pendente').reduce((acc, curr) => acc + Number(curr.value), 0);
@@ -95,9 +101,13 @@ const Costs = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  {cost.status === 'Pendente' && (
+                  {cost.status === 'Pendente' ? (
                     <button onClick={() => handleMarkAsPaid(cost)} className="text-green-600 hover:text-green-900 mr-4" title="Marcar como Pago">
                       <Check className="h-5 w-5" />
+                    </button>
+                  ) : (
+                    <button onClick={() => handleMarkAsPending(cost)} className="text-yellow-600 hover:text-yellow-900 mr-4" title="Marcar como Pendente">
+                      <XCircle className="h-5 w-5" />
                     </button>
                   )}
                   <button onClick={() => deleteCost(cost.id)} className="text-red-600 hover:text-red-900" title="Excluir">

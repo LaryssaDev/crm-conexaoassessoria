@@ -57,28 +57,28 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => localStorage.setItem('conexao_costs', JSON.stringify(costs)), [costs]);
   useEffect(() => localStorage.setItem('conexao_financial', JSON.stringify(financialRecords)), [financialRecords]);
 
-  const addLead = (lead: Lead) => setLeads([...leads, lead]);
+  const addLead = (lead: Lead) => setLeads(prev => [...prev, lead]);
   const updateLead = (id: string, updates: Partial<Lead>) => {
-    setLeads(leads.map(l => l.id === id ? { ...l, ...updates } : l));
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
   };
-  const deleteLead = (id: string) => setLeads(leads.filter(l => l.id !== id));
+  const deleteLead = (id: string) => setLeads(prev => prev.filter(l => l.id !== id));
 
-  const addCost = (cost: Cost) => setCosts([...costs, cost]);
+  const addCost = (cost: Cost) => setCosts(prev => [...prev, cost]);
   const updateCost = (id: string, updates: Partial<Cost>) => {
-    setCosts(costs.map(c => c.id === id ? { ...c, ...updates } : c));
+    setCosts(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
   };
-  const deleteCost = (id: string) => setCosts(costs.filter(c => c.id !== id));
+  const deleteCost = (id: string) => setCosts(prev => prev.filter(c => c.id !== id));
 
-  const addFinancialRecord = (record: FinancialRecord) => setFinancialRecords([...financialRecords, record]);
-  const deleteFinancialRecord = (id: string) => setFinancialRecords(financialRecords.filter(r => r.id !== id));
+  const addFinancialRecord = (record: FinancialRecord) => setFinancialRecords(prev => [...prev, record]);
+  const deleteFinancialRecord = (id: string) => setFinancialRecords(prev => prev.filter(r => r.id !== id));
 
-  const addUser = (user: User) => setUsers([...users, user]);
+  const addUser = (user: User) => setUsers(prev => [...prev, user]);
   const updateUser = (id: string, updates: Partial<User>) => {
-    setUsers(users.map(u => u.id === id ? { ...u, ...updates } : u));
+    setUsers(prev => prev.map(u => u.id === id ? { ...u, ...updates } : u));
   };
-  const deleteUser = (id: string) => setUsers(users.filter(u => u.id !== id));
+  const deleteUser = (id: string) => setUsers(prev => prev.filter(u => u.id !== id));
 
-  const addTeam = (team: Team) => setTeams([...teams, team]);
+  const addTeam = (team: Team) => setTeams(prev => [...prev, team]);
 
   return (
     <DataContext.Provider value={{

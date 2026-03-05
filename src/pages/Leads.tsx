@@ -3,13 +3,16 @@ import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { Lead, LeadStatus, LeadHistory } from '../types';
 import Modal from '../components/Modal';
-import { Plus, Upload, Search, Filter, History as HistoryIcon, MessageSquare } from 'lucide-react';
+import { Plus, Upload, Search, Filter, History as HistoryIcon, MessageSquare, Trash, Edit } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 const Leads = () => {
-  const { leads, addLead } = useData();
+  const { leads, addLead, updateLead, deleteLead } = useData();
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [leadToDelete, setLeadToDelete] = useState<Lead | null>(null);
+  const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<LeadStatus | 'ALL'>('ALL');
 
@@ -30,18 +33,25 @@ const Leads = () => {
     setNewLead(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const lead: Lead = {
-      id: Math.random().toString(36).substr(2, 9),
-      createdAt: new Date().toISOString(),
-      history: [],
-      commercialConsultantId: user?.role === 'CONSULTOR_COMERCIAL' ? user.id : undefined,
-      legalConsultantId: user?.role === 'CONSULTOR_JURIDICO' ? user.id : undefined,
-      ...newLead as Lead
-    };
-    addLead(lead);
+  const handleEditClick = (lead: Lead) => {
+    setEditingLead(lead);
+    setNewLead({
+      name: lead.name,
+      cpf: lead.cpf,
+      phone: lead.phone,
+      email: lead.email,
+      address: lead.address,
+      origin: lead.origin,
+      contractType: lead.contractType,
+      installmentValue: lead.installmentValue,
+      status: lead.status,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
     setIsModalOpen(false);
+    setEditingLead(null);
     setNewLead({
       name: '',
       cpf: '',
@@ -53,6 +63,39 @@ const Leads = () => {
       installmentValue: 0,
       status: 'NOVO',
     });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (editingLead) {
+      updateLead(editingLead.id, newLead);
+    } else {
+      const lead: Lead = {
+        id: Math.random().toString(36).substr(2, 9),
+        createdAt: new Date().toISOString(),
+        history: [],
+        commercialConsultantId: user?.role === 'CONSULTOR_COMERCIAL' ? user.id : undefined,
+        legalConsultantId: user?.role === 'CONSULTOR_JURIDICO' ? user.id : undefined,
+        ...newLead as Lead
+      };
+      addLead(lead);
+    }
+    
+    handleCloseModal();
+  };
+
+  const handleDeleteClick = (lead: Lead) => {
+    setLeadToDelete(lead);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (leadToDelete) {
+      deleteLead(leadToDelete.id);
+      setIsDeleteModalOpen(false);
+      setLeadToDelete(null);
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,6 +195,20 @@ const Leads = () => {
                         'bg-yellow-100 text-yellow-800'}`}>
                       {lead.status}
                     </p>
+                    <button
+                      onClick={() => handleEditClick(lead)}
+                      className="text-gray-400 hover:text-blue-600 transition-colors"
+                      title="Editar Lead"
+                    >
+                      <Edit className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteClick(lead)}
+                      className="text-gray-400 hover:text-red-600 transition-colors"
+                      title="Excluir Lead"
+                    >
+                      <Trash className="h-5 w-5" />
+                    </button>
                   </div>
                 </div>
                 <div className="mt-2 sm:flex sm:justify-between">
@@ -175,7 +232,7 @@ const Leads = () => {
         </ul>
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Novo Lead">
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={editingLead ? "Editar Lead" : "Novo Lead"}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Nome Completo</label>
@@ -225,7 +282,7 @@ const Leads = () => {
           <div className="flex justify-end pt-4">
             <button
               type="button"
-              onClick={() => setIsModalOpen(false)}
+              onClick={handleCloseModal}
               className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 mr-2"
             >
               Cancelar
@@ -238,6 +295,31 @@ const Leads = () => {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} title="Confirmar Exclusão">
+        <div className="space-y-4">
+          <p className="text-gray-600">
+            Tem certeza que deseja excluir o lead <strong>{leadToDelete?.name}</strong>?
+            <br />
+            Esta ação não pode ser desfeita e todo o histórico será perdido.
+          </p>
+          <div className="flex justify-end space-x-3 pt-4">
+            <button
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={confirmDelete}
+              className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              Excluir
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

@@ -27,9 +27,9 @@ const Contract = () => {
     setContractData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (selectedLead) {
-      generateContract(selectedLead, contractData);
+      await generateContract(selectedLead, contractData);
     }
   };
 
